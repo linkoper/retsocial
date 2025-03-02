@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Red Social</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 0;
+    }
+
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        padding: 10px 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 100;
+    }
+
+    .navbar i {
+        font-size: 24px;
+        color: #555;
+        cursor: pointer;
+    }
+
+    .container {
+        margin-top: 60px;
+        padding: 20px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-input {
+        display: none;
+        margin-bottom: 20px;
+    }
+
+    .post-input textarea,
+    .post-input input[type="file"] {
+        width: 100%;
+        padding: 5px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .post-input button {
+        margin-top: 5px;
+        width: 100%;
+        padding: 5px;
+        border: none;
+        background-color: #e1306c;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .post-input button:hover {
+        background-color: #c1275a;
+    }
+
+    .post {
+        background-color: #fff;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .post img,
+    .post video {
+        max-width: 100%;
+        border-radius: 10px;
+        margin-top: 5px;
+    }
+
+    .actions i {
+        margin-right: 10px;
+        cursor: pointer;
+        color: #555;
+    }
+
+    .actions i:hover {
+        color: #e1306c;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <i class="fas fa-home" onclick="showSection('home')"></i>
+    <i class="fas fa-search" onclick="toggleSearch()"></i>
+    <i class="fas fa-plus-square" onclick="togglePostInput()"></i>
+    <i class="fas fa-user" onclick="showSection('profile')"></i>
+</div>
+
+<div class="container hidden" id="searchSection">
+    <input type="text" placeholder="Buscar..." style="width: 100%; padding: 5px;">
+</div>
+
+<div class="container" id="homeSection">
+    <div class="post-input" id="postInputContainer">
+        <textarea id="postInput" placeholder="Escribe algo..."></textarea>
+        <input type="file" id="fileInput" accept="image/*,video/*">
+        <button onclick="publishPost()">Publicar</button>
+    </div>
+    <div id="postsContainer"></div>
+</div>
+
+<div class="container hidden" id="profileSection">
+    <img src="https://via.placeholder.com/100" style="border-radius: 50%;">
+    <p>Usuario: <strong>MiPerfil</strong></p>
+    <p>Publicaciones: <strong>0</strong></p>
+</div>
+
+<script>
+    const postsContainer = document.getElementById("postsContainer");
+    const postInputContainer = document.getElementById("postInputContainer");
+    const postInput = document.getElementById("postInput");
+    const fileInput = document.getElementById("fileInput");
+    const searchSection = document.getElementById("searchSection");
+
+    function showSection(section) {
+        const sections = ["homeSection", "searchSection", "profileSection"];
+        sections.forEach(id => {
+            document.getElementById(id).classList.add("hidden");
+        });
+        document.getElementById(`${section}Section`).classList.remove("hidden");
+    }
+
+    function toggleSearch() {
+        searchSection.classList.toggle("hidden");
+    }
+
+    function togglePostInput() {
+        postInputContainer.style.display = 
+            postInputContainer.style.display === "none" || postInputContainer.style.display === "" 
+            ? "block" 
+            : "none";
+    }
+
+    function publishPost() {
+        const postText = postInput.value.trim();
+        const file = fileInput.files[0];
+        if (postText !== "" || file) {
+            addPost(postText, file);
+            postInput.value = "";
+            fileInput.value = "";
+            postInputContainer.style.display = "none";
+        } else {
+            alert("Escribe algo o elige un archivo.");
+        }
+    }
+
+    function addPost(postText, file) {
+        const postElement = document.createElement("div");
+        postElement.className = "post";
+        let content = `<p>${postText}</p>`;
+
+        if (file) {
+            const url = URL.createObjectURL(file);
+            if (file.type.startsWith("image/")) {
+                content += `<img src="${url}" alt="Imagen">`;
+            } else if (file.type.startsWith("video/")) {
+                content += `<video controls><source src="${url}" type="${file.type}"></video>`;
+            }
+        }
+
+        postElement.innerHTML = `
+            ${content}
+            <div class="actions">
+                <i class="far fa-heart" onclick="likePost(this)"></i>
+                <i class="far fa-comment"></i>
+                <i class="far fa-bookmark"></i>
+            </div>
+        `;
+        postsContainer.prepend(postElement);
+    }
+
+    function likePost(icon) {
+        icon.classList.toggle("fas");
+        icon.classList.toggle("far");
+    }
+</script>
+
+</body>
+</html>
